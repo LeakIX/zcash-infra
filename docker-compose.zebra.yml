@@ -4,7 +4,7 @@ version: '3.8'
 
 services:
   zebra:
-    image: zfnd/zebra:2.3.0
+    image: zfnd/zebra:3.1.0
     container_name: zebra
     restart: always
     ports:

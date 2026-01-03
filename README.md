@@ -1,14 +1,13 @@
 # Run your own Zcash infrastructure
 
-WARNING: zebra + zaino is not fully working, yet.
-An updated README will be provided to deploy more efficiently on different
-cloud providers and bare metal servers.
+WARNING: zebra + zaino is not fully working, yet. An updated README will be
+provided to deploy more efficiently on different cloud providers and bare metal
+servers.
 
 The endgoal of this repository is to maintain an easy-to-deploy Zcash
-infrastructure using docker-compose and rely on Makefile targets.
-A setup using [cloud-init](https://cloudinit.readthedocs.io/en/latest/) is
-being developed to be used on different kind of servers, and get a "one-click"
-deployment.
+infrastructure using docker-compose and rely on Makefile targets. A setup using
+[cloud-init](https://cloudinit.readthedocs.io/en/latest/) is being developed to
+be used on different kind of servers, and get a "one-click" deployment.
 
 See [the roadmap](#roadmap) for more information.
 
@@ -52,8 +51,7 @@ All configuration settings are stored in the `.env` file, including:
 - Web UI configuration:
   - `CADDY_CONFIG_PATH`: The path to the Caddy configuration file
   - `GRAFANA_DOMAIN`: The domain name for Grafana (e.g., foo.bar.com)
-  - `GRAFANA_ROOT_URL`: The root URL for Grafana (e.g.,
-    https://foo.bar.com)
+  - `GRAFANA_ROOT_URL`: The root URL for Grafana (e.g., https://foo.bar.com)
   - `GRAFANA_SERVE_FROM_SUB_PATH`: Whether Grafana is served from a sub-path
 - Credentials and other sensitive configuration:
   - `LIGHTWALLETD_RPC_USER`/`LIGHTWALLETD_RPC_PASSWORD`: For lightwalletd to
@@ -77,6 +75,7 @@ The services are organized in separate Docker Compose files:
    **Zaino Build Workflow**:
 
    For production/stable use:
+
    ```bash
    # Build Zaino from the latest main branch
    make build-zaino
@@ -86,6 +85,7 @@ The services are organized in separate Docker Compose files:
    ```
 
    For testing a specific commit:
+
    ```bash
    # 1. Build Zaino from a specific commit
    make build-zaino-commit COMMIT=abc123def456
@@ -98,6 +98,7 @@ The services are organized in separate Docker Compose files:
    ```
 
    When you're done testing, you can return to the latest version:
+
    ```bash
    # Clean up all Zaino images
    make clean-zaino
@@ -108,6 +109,7 @@ The services are organized in separate Docker Compose files:
    # Start Zebra services with latest Zaino
    make start-zebra
    ```
+
 3. `docker-compose.caddy.yml`: Contains the Caddy web server
 4. `docker-compose.monitoring.yml`: Contains monitoring stack (Prometheus, Node
    Exporter, Grafana)
@@ -172,10 +174,11 @@ exporter, and Grafana configured to monitor system and Zcash node resources.
 
 ### Setup Instructions
 
-1. Prepare the data directories (see [Data Directories
-   Setup](#data-directories-setup)) - requires sudo privileges
+1. Prepare the data directories (see
+   [Data Directories Setup](#data-directories-setup)) - requires sudo privileges
 
 2. Start the monitoring stack:
+
 ```bash
 docker-compose -f docker-compose.monitoring.yml up -d
 ```
@@ -188,8 +191,8 @@ docker-compose -f docker-compose.monitoring.yml up -d
 ### Zcash Metrics
 
 The infrastructure includes a custom Python-based Zcash metrics exporter
-(`scripts/zcash-exporter.py`) that collects data from the Zcash node via RPC
-and exposes it in Prometheus format. The metrics include:
+(`scripts/zcash-exporter.py`) that collects data from the Zcash node via RPC and
+exposes it in Prometheus format. The metrics include:
 
 - Block height and sync progress
 - Network difficulty and hashrate
@@ -199,12 +202,13 @@ and exposes it in Prometheus format. The metrics include:
 - Mempool statistics
 - Transaction metrics
 
-These metrics are visualized in the Zcash dashboard in Grafana, providing
-a comprehensive view of your node's performance and the network status.
+These metrics are visualized in the Zcash dashboard in Grafana, providing a
+comprehensive view of your node's performance and the network status.
 
 ### Automatic Dashboard Provisioning
 
 The setup includes automatic provisioning for Grafana:
+
 - Prometheus data source is automatically added
 - A Node Exporter dashboard for monitoring CPU, memory, disk I/O, and network is
   included
@@ -248,8 +252,7 @@ for your environment.
 ### Example: Hetzner Server Setup
 
 If using a Hetzner server, the data disk is not mounted automatically by
-default, and an entry in `/etc/fstab` must be added.
-For instance:
+default, and an entry in `/etc/fstab` must be added. For instance:
 
 ```shell
 # Data for zcashd and lightwalletd
@@ -257,16 +260,18 @@ For instance:
 ```
 
 To mount the disk manually in case the automatic mounting does not work:
+
 ```shell
 sudo mount -t ext4 /dev/nvme2n1p1 /media/data-disk/
 ```
 
 You can also check that the file `/etc/fstab` is well-formed by using:
+
 ```
 sudo mount -a
 ```
-before rebooting the server
 
+before rebooting the server
 
 ## Data Directories Setup
 
@@ -300,6 +305,7 @@ Template configuration files are provided for both node implementations:
   external IP address automatically replaced from your `.env` file.
 
 The zcash.conf file includes:
+
 - Network configuration for external connectivity
 - RPC authentication settings
 - Performance optimizations
@@ -338,6 +344,6 @@ sudo chmod -R 755 ${DATA_DIR}/grafana_data
 - [ ] Provide cloud-init files
 - [ ] Provide different cloud providers setup instructions
 - [ ] Setting firewalls automatically
-- [ ] Integrate with one Internet scanner, like
-      [LeakIX](https://leakix.net) to detect misconfigurations and setting up
-      notifications for outdated/vulnerable infrastructure.
+- [ ] Integrate with one Internet scanner, like [LeakIX](https://leakix.net) to
+      detect misconfigurations and setting up notifications for
+      outdated/vulnerable infrastructure.

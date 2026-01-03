@@ -1,10 +1,13 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
 ## Project Overview
 
-Docker-based Zcash blockchain infrastructure deployment framework. Provides containerized setup for running Zcash nodes with monitoring, reverse proxy, and light wallet capabilities.
+Docker-based Zcash blockchain infrastructure deployment framework. Provides
+containerized setup for running Zcash nodes with monitoring, reverse proxy, and
+light wallet capabilities.
 
 **Note:** zebra + zaino integration is still in development.
 
@@ -47,16 +50,21 @@ make help
 ### Service Stacks
 
 Two node implementation options (run one OR the other):
+
 - **zcashd stack**: `docker-compose.zcash.yml` - zcashd + lightwalletd
-- **zebra stack**: `docker-compose.zebra.yml` - zebra + zaino (built from source)
+- **zebra stack**: `docker-compose.zebra.yml` - zebra + zaino (built from
+  source)
 
 Supporting services:
+
 - `docker-compose.caddy.yml` - Caddy reverse proxy with TLS termination
-- `docker-compose.monitoring.yml` - Prometheus + Node Exporter + Grafana + zcash-exporter
+- `docker-compose.monitoring.yml` - Prometheus + Node Exporter + Grafana +
+  zcash-exporter
 
 ### Network and Data Flow
 
-All containers communicate via `zcash-network` Docker network. Caddy handles TLS; internal services use plaintext/h2c.
+All containers communicate via `zcash-network` Docker network. Caddy handles
+TLS; internal services use plaintext/h2c.
 
 ```
 External → Caddy (TLS) → lightwalletd/zaino (gRPC) → zcashd/zebra (RPC)
@@ -65,7 +73,9 @@ External → Caddy (TLS) → lightwalletd/zaino (gRPC) → zcashd/zebra (RPC)
 
 ### Data Persistence
 
-All data stored in `${DATA_DIR}` (default: `/media/data-disk`). Key UIDs for volume permissions:
+All data stored in `${DATA_DIR}` (default: `/media/data-disk`). Key UIDs for
+volume permissions:
+
 - `lightwalletd_db_volume/` - uid 2002
 - `zebrad-data/` - uid 2001
 - `zaino-data/` - uid 2003
@@ -86,17 +96,25 @@ All data stored in `${DATA_DIR}` (default: `/media/data-disk`). Key UIDs for vol
 
 ### Custom Components
 
-`scripts/zcash-exporter.py` - Python Prometheus exporter that polls zcashd RPC for blockchain metrics (block height, difficulty, peers, mempool stats).
+`scripts/zcash-exporter.py` - Python Prometheus exporter that polls zcashd RPC
+for blockchain metrics (block height, difficulty, peers, mempool stats).
 
 ## Development Guidelines
 
 ### Branching Strategy
 
-The repository uses a protected main branch for production code with no direct pushes permitted. All pull requests should target the develop branch instead. Feature branches require descriptive naming conventions such as `fix/dark-mode-seed-display` or `feat/qr-codes`.
+The repository uses a protected main branch for production code with no direct
+pushes permitted. All pull requests should target the develop branch instead.
+Feature branches require descriptive naming conventions such as
+`fix/dark-mode-seed-display` or `feat/qr-codes`.
 
 ### Changelog
 
-Every modification requires a corresponding entry in CHANGELOG.md, which CI enforces. The entry must appear in a separate commit from code changes and include issue and PR references. The project follows Keep a Changelog format with entries placed under the Unreleased section using categories like Added, Changed, Fixed, and Security.
+Every modification requires a corresponding entry in CHANGELOG.md, which CI
+enforces. The entry must appear in a separate commit from code changes and
+include issue and PR references. The project follows Keep a Changelog format
+with entries placed under the Unreleased section using categories like Added,
+Changed, Fixed, and Security.
 
 ### Commit Standards
 
@@ -104,4 +122,5 @@ Every modification requires a corresponding entry in CHANGELOG.md, which CI enfo
 - Do not add Claude as co-author
 - Wrap commit message titles at 72 characters
 - Wrap commit message body at 80 characters
-- Use conventional commit prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`
+- Use conventional commit prefixes: `feat:`, `fix:`, `docs:`, `chore:`,
+  `refactor:`, `test:`

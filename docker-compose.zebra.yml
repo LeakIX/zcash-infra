@@ -7,8 +7,8 @@ services:
     container_name: zebra
     restart: always
     ports:
-      - "${ZEBRA_RPC_PORT:-8232}:8232"     # RPC port for API access (same as zcashd for compatibility)
-      - "${ZEBRA_P2P_PORT:-8233}:8233"     # P2P port for peer connections
+      - "${ZEBRA_RPC_PORT:-8232}:8232" # RPC port for API access (same as zcashd for compatibility)
+      - "${ZEBRA_P2P_PORT:-8233}:8233" # P2P port for peer connections
     volumes:
       - ${DATA_DIR}/zebrad-cache:/home/zebra/.cache/zebra
       - ./zebrad.toml:/etc/zebrad/zebrad.toml:ro
@@ -16,13 +16,13 @@ services:
       - zcash-network
 
   zaino:
-    image: zingolabs/zaino:latest  # Build with 'make build-zaino' or specify commit with 'make update-zaino-commit COMMIT=<hash>'
+    image: zingolabs/zaino:latest # Build with 'make build-zaino' or specify commit with 'make update-zaino-commit COMMIT=<hash>'
     container_name: zaino
     restart: always
     depends_on:
       - zebra
     ports:
-      - "${ZAINO_GRPC_PORT:-8137}:8137"  # Zaino API port
+      - "${ZAINO_GRPC_PORT:-8137}:8137" # Zaino API port
     volumes:
       - ./zaino.toml:/etc/zaino/zaino.toml:ro
       - ${DATA_DIR}/zaino-data/zaino-cache:/home/container_user/.cache/zaino

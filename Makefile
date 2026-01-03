@@ -12,6 +12,9 @@ DATA_DIR ?= /media/data-disk
 # Set SUDO to empty for local development: make setup SUDO=
 SUDO ?= sudo
 
+# macOS sed requires '' for in-place, GNU sed does not
+SEDI := $(shell if sed --version 2>/dev/null | grep -q GNU; then echo 'sed -i'; else echo 'sed -i ""'; fi)
+
 .PHONY: help
 help: ## Show this help message
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
@@ -24,25 +27,25 @@ setup: ## Create all required directories and set permissions
 	@echo "Creating Zcash service directories..."
 	$(SUDO) mkdir -p $(DATA_DIR)/zcashd_data
 	$(SUDO) mkdir -p $(DATA_DIR)/lightwalletd_db_volume
-	$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_db_volume
+	$(if $(SUDO),$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_db_volume)
 
 	@echo "Setting up zcash.conf file (updating if necessary)"
 	cp zcash.conf.template zcash.conf; \
-	sed -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
-	sed -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
-	sed -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.conf; \
+	$(SEDI) "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
+	$(SEDI) "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
+	$(SEDI) "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.conf; \
 	echo "Created new zcash.conf file with proper credentials. Copying in $(DATA_DIR)/zcashd/zcash.conf"; \
 	$(SUDO) cp -f zcash.conf $(DATA_DIR)/zcashd_data/zcash.conf
 
 	@echo "Setting up zebrad.toml (updating if necessary)"
 	@cp -f zebrad.toml.template zebrad.toml
-	sed -i "s/ZEBRA_P2P_PORT/$(ZEBRA_P2P_PORT)/g" zebrad.toml
-	sed -i "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zebrad.toml
+	$(SEDI) "s/ZEBRA_P2P_PORT/$(ZEBRA_P2P_PORT)/g" zebrad.toml
+	$(SEDI) "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zebrad.toml
 
 	@echo "Setting up zaino.toml (updating if necessary)"
 	@cp -f zaino.toml.template zaino.toml
-	sed -i "s/ZAINO_GRPC_PORT/$(ZAINO_GRPC_PORT)/g" zaino.toml
-	sed -i "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zaino.toml
+	$(SEDI) "s/ZAINO_GRPC_PORT/$(ZAINO_GRPC_PORT)/g" zaino.toml
+	$(SEDI) "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zaino.toml
 
 	@echo "Creating Caddy directories..."
 	$(SUDO) mkdir -p $(DATA_DIR)/caddy_data
@@ -51,17 +54,17 @@ setup: ## Create all required directories and set permissions
 	@echo "Creating monitoring directories..."
 	$(SUDO) mkdir -p $(DATA_DIR)/prometheus_data
 	$(SUDO) mkdir -p $(DATA_DIR)/grafana_data
-	$(SUDO) chown 65534:65534 $(DATA_DIR)/prometheus_data
-	$(SUDO) chown -R 472:0 $(DATA_DIR)/grafana_data
-	$(SUDO) chmod -R 755 $(DATA_DIR)/grafana_data
+	$(if $(SUDO),$(SUDO) chown 65534:65534 $(DATA_DIR)/prometheus_data)
+	$(if $(SUDO),$(SUDO) chown -R 472:0 $(DATA_DIR)/grafana_data)
+	$(if $(SUDO),$(SUDO) chmod -R 755 $(DATA_DIR)/grafana_data)
 
 	@echo "Creating zebrad directories..."
 	$(SUDO) mkdir -p $(DATA_DIR)/zebrad-data
-	$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-data
+	$(if $(SUDO),$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-data)
 
 	@echo "Creating zaino directories..."
 	$(SUDO) mkdir -p $(DATA_DIR)/zaino-data
-	$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-data
+	$(if $(SUDO),$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-data)
 
 	@echo "Creating Docker network..."
 	-docker network create zcash-network 2>/dev/null || true
@@ -109,23 +112,23 @@ setup-testnet: ## Create testnet directories and config files
 	$(SUDO) mkdir -p $(DATA_DIR)/lightwalletd_testnet_db
 	$(SUDO) mkdir -p $(DATA_DIR)/zebrad-testnet-cache
 	$(SUDO) mkdir -p $(DATA_DIR)/zaino-testnet-data
-	$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_testnet_db
-	$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-testnet-cache
-	$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-testnet-data
+	$(if $(SUDO),$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_testnet_db)
+	$(if $(SUDO),$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-testnet-cache)
+	$(if $(SUDO),$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-testnet-data)
 
 	@echo "Setting up testnet config files..."
 	@cp -f zcash.conf.testnet.template zcash.testnet.conf
-	sed -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.testnet.conf
-	sed -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.testnet.conf
+	$(SEDI) "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.testnet.conf
+	$(SEDI) "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.testnet.conf
 	$(SUDO) cp -f zcash.testnet.conf $(DATA_DIR)/zcashd_testnet_data/zcash.conf
 
 	@cp -f zebrad.toml.testnet.template zebrad.testnet.toml
-	sed -i "s/ZEBRA_P2P_PORT/18233/g" zebrad.testnet.toml
-	sed -i "s/ZEBRA_RPC_PORT/18232/g" zebrad.testnet.toml
+	$(SEDI) "s/ZEBRA_P2P_PORT/18233/g" zebrad.testnet.toml
+	$(SEDI) "s/ZEBRA_RPC_PORT/18232/g" zebrad.testnet.toml
 
 	@cp -f zaino.toml.testnet.template zaino.testnet.toml
-	sed -i "s/ZAINO_GRPC_PORT/8137/g" zaino.testnet.toml
-	sed -i "s/ZEBRA_RPC_PORT/8232/g" zaino.testnet.toml
+	$(SEDI) "s/ZAINO_GRPC_PORT/8137/g" zaino.testnet.toml
+	$(SEDI) "s/ZEBRA_RPC_PORT/8232/g" zaino.testnet.toml
 
 	@echo "Testnet setup complete!"
 
@@ -300,7 +303,7 @@ update-zaino-commit: ## Update docker-compose to use a specific Zaino commit (CO
 		exit 1; \
 	fi
 	@echo "Updating docker-compose.zebra.yml to use Zaino commit $(COMMIT)..."
-	@sed -i 's|image: zingolabs/zaino:.*|image: zingolabs/zaino:$(COMMIT)  # Build with '\''make build-zaino-commit COMMIT=$(COMMIT)'\''|' docker-compose.zebra.yml
+	@$(SEDI) 's|image: zingolabs/zaino:.*|image: zingolabs/zaino:$(COMMIT)  # Build with '\''make build-zaino-commit COMMIT=$(COMMIT)'\''|' docker-compose.zebra.yml
 	@echo "Docker Compose configuration updated to use Zaino commit $(COMMIT)."
 	@echo "Run 'make start-zebra' to apply the changes."
 
@@ -380,9 +383,9 @@ clean-monitoring: ## Reset Prometheus and Grafana data (WARNING: destructive!)
 	@echo "Recreating monitoring directories with proper permissions..."
 	$(SUDO) mkdir -p $(DATA_DIR)/prometheus_data
 	$(SUDO) mkdir -p $(DATA_DIR)/grafana_data
-	$(SUDO) chown 65534:65534 $(DATA_DIR)/prometheus_data
-	$(SUDO) chown -R 472:0 $(DATA_DIR)/grafana_data
-	$(SUDO) chmod -R 755 $(DATA_DIR)/grafana_data
+	$(if $(SUDO),$(SUDO) chown 65534:65534 $(DATA_DIR)/prometheus_data)
+	$(if $(SUDO),$(SUDO) chown -R 472:0 $(DATA_DIR)/grafana_data)
+	$(if $(SUDO),$(SUDO) chmod -R 755 $(DATA_DIR)/grafana_data)
 
 	@echo "Monitoring data has been cleaned."
 	@echo "You can restart the monitoring services with 'make start-monitoring'"

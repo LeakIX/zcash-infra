@@ -9,6 +9,9 @@ endif
 # Default values if not defined in .env
 DATA_DIR ?= /media/data-disk
 
+# Set SUDO to empty for local development: make setup SUDO=
+SUDO ?= sudo
+
 .PHONY: help
 help: ## Show this help message
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
@@ -19,9 +22,9 @@ setup: ## Create all required directories and set permissions
 	@echo "Using DATA_DIR: $(DATA_DIR)"
 
 	@echo "Creating Zcash service directories..."
-	sudo mkdir -p $(DATA_DIR)/zcashd_data
-	sudo mkdir -p $(DATA_DIR)/lightwalletd_db_volume
-	sudo chown 2002 $(DATA_DIR)/lightwalletd_db_volume
+	$(SUDO) mkdir -p $(DATA_DIR)/zcashd_data
+	$(SUDO) mkdir -p $(DATA_DIR)/lightwalletd_db_volume
+	$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_db_volume
 
 	@echo "Setting up zcash.conf file (updating if necessary)"
 	cp zcash.conf.template zcash.conf; \
@@ -29,7 +32,7 @@ setup: ## Create all required directories and set permissions
 	sed -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
 	sed -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.conf; \
 	echo "Created new zcash.conf file with proper credentials. Copying in $(DATA_DIR)/zcashd/zcash.conf"; \
-	sudo cp -f zcash.conf $(DATA_DIR)/zcashd_data/zcash.conf
+	$(SUDO) cp -f zcash.conf $(DATA_DIR)/zcashd_data/zcash.conf
 
 	@echo "Setting up zebrad.toml (updating if necessary)"
 	@cp -f zebrad.toml.template zebrad.toml
@@ -42,23 +45,23 @@ setup: ## Create all required directories and set permissions
 	sed -i "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zaino.toml
 
 	@echo "Creating Caddy directories..."
-	sudo mkdir -p $(DATA_DIR)/caddy_data
-	sudo mkdir -p $(DATA_DIR)/caddy_config
+	$(SUDO) mkdir -p $(DATA_DIR)/caddy_data
+	$(SUDO) mkdir -p $(DATA_DIR)/caddy_config
 
 	@echo "Creating monitoring directories..."
-	sudo mkdir -p $(DATA_DIR)/prometheus_data
-	sudo mkdir -p $(DATA_DIR)/grafana_data
-	sudo chown 65534:65534 $(DATA_DIR)/prometheus_data
-	sudo chown -R 472:0 $(DATA_DIR)/grafana_data
-	sudo chmod -R 755 $(DATA_DIR)/grafana_data
+	$(SUDO) mkdir -p $(DATA_DIR)/prometheus_data
+	$(SUDO) mkdir -p $(DATA_DIR)/grafana_data
+	$(SUDO) chown 65534:65534 $(DATA_DIR)/prometheus_data
+	$(SUDO) chown -R 472:0 $(DATA_DIR)/grafana_data
+	$(SUDO) chmod -R 755 $(DATA_DIR)/grafana_data
 
 	@echo "Creating zebrad directories..."
-	sudo mkdir -p $(DATA_DIR)/zebrad-data
-	sudo chown -R 2001:2001 $(DATA_DIR)/zebrad-data
+	$(SUDO) mkdir -p $(DATA_DIR)/zebrad-data
+	$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-data
 
 	@echo "Creating zaino directories..."
-	sudo mkdir -p $(DATA_DIR)/zaino-data
-	sudo chown -R 2003:2003 $(DATA_DIR)/zaino-data
+	$(SUDO) mkdir -p $(DATA_DIR)/zaino-data
+	$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-data
 
 	@echo "Creating Docker network..."
 	-docker network create zcash-network 2>/dev/null || true
@@ -102,19 +105,19 @@ start-monitoring: ## Start monitoring stack (Prometheus, Node Exporter, Grafana)
 .PHONY: setup-testnet
 setup-testnet: ## Create testnet directories and config files
 	@echo "Setting up testnet directories..."
-	sudo mkdir -p $(DATA_DIR)/zcashd_testnet_data
-	sudo mkdir -p $(DATA_DIR)/lightwalletd_testnet_db
-	sudo mkdir -p $(DATA_DIR)/zebrad-testnet-cache
-	sudo mkdir -p $(DATA_DIR)/zaino-testnet-data
-	sudo chown 2002 $(DATA_DIR)/lightwalletd_testnet_db
-	sudo chown -R 2001:2001 $(DATA_DIR)/zebrad-testnet-cache
-	sudo chown -R 2003:2003 $(DATA_DIR)/zaino-testnet-data
+	$(SUDO) mkdir -p $(DATA_DIR)/zcashd_testnet_data
+	$(SUDO) mkdir -p $(DATA_DIR)/lightwalletd_testnet_db
+	$(SUDO) mkdir -p $(DATA_DIR)/zebrad-testnet-cache
+	$(SUDO) mkdir -p $(DATA_DIR)/zaino-testnet-data
+	$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_testnet_db
+	$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-testnet-cache
+	$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-testnet-data
 
 	@echo "Setting up testnet config files..."
 	@cp -f zcash.conf.testnet.template zcash.testnet.conf
 	sed -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.testnet.conf
 	sed -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.testnet.conf
-	sudo cp -f zcash.testnet.conf $(DATA_DIR)/zcashd_testnet_data/zcash.conf
+	$(SUDO) cp -f zcash.testnet.conf $(DATA_DIR)/zcashd_testnet_data/zcash.conf
 
 	@cp -f zebrad.toml.testnet.template zebrad.testnet.toml
 	sed -i "s/ZEBRA_P2P_PORT/18233/g" zebrad.testnet.toml
@@ -320,8 +323,8 @@ clean-zcash: ## Remove Zcash containers and data volumes (WARNING: destructive!)
 	@echo "Revoming zcash services, including the directories"
 	docker-compose -f docker-compose.zcash.yml down -v
 	@echo "Delete Zcash directories..."
-	sudo rm -rf $(DATA_DIR)/zcashd_data
-	sudo rm -rf $(DATA_DIR)/lightwalletd_db_volume
+	$(SUDO) rm -rf $(DATA_DIR)/zcashd_data
+	$(SUDO) rm -rf $(DATA_DIR)/lightwalletd_db_volume
 
 .PHONY: clean-zaino
 clean-zaino: ## Remove Zaino Docker image and build directory
@@ -369,17 +372,17 @@ clean-monitoring: ## Reset Prometheus and Grafana data (WARNING: destructive!)
 	docker-compose -f docker-compose.monitoring.yml down
 
 	@echo "Removing Prometheus data..."
-	sudo rm -rf $(DATA_DIR)/prometheus_data/*
+	$(SUDO) rm -rf $(DATA_DIR)/prometheus_data/*
 
 	@echo "Removing Grafana data..."
-	sudo rm -rf $(DATA_DIR)/grafana_data/*
+	$(SUDO) rm -rf $(DATA_DIR)/grafana_data/*
 
 	@echo "Recreating monitoring directories with proper permissions..."
-	sudo mkdir -p $(DATA_DIR)/prometheus_data
-	sudo mkdir -p $(DATA_DIR)/grafana_data
-	sudo chown 65534:65534 $(DATA_DIR)/prometheus_data
-	sudo chown -R 472:0 $(DATA_DIR)/grafana_data
-	sudo chmod -R 755 $(DATA_DIR)/grafana_data
+	$(SUDO) mkdir -p $(DATA_DIR)/prometheus_data
+	$(SUDO) mkdir -p $(DATA_DIR)/grafana_data
+	$(SUDO) chown 65534:65534 $(DATA_DIR)/prometheus_data
+	$(SUDO) chown -R 472:0 $(DATA_DIR)/grafana_data
+	$(SUDO) chmod -R 755 $(DATA_DIR)/grafana_data
 
 	@echo "Monitoring data has been cleaned."
 	@echo "You can restart the monitoring services with 'make start-monitoring'"

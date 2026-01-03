@@ -32,8 +32,8 @@ setup: ## Create all required directories and set permissions
 	@echo "Using DATA_DIR: $(DATA_DIR)"
 
 	@echo "Creating Zcash service directories..."
-	$(SUDO) mkdir -p $(DATA_DIR)/zcashd_data
-	$(SUDO) mkdir -p $(DATA_DIR)/lightwalletd_db_volume
+	mkdir -p $(DATA_DIR)/zcashd_data
+	mkdir -p $(DATA_DIR)/lightwalletd_db_volume
 	$(if $(SUDO),$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_db_volume)
 
 	@echo "Setting up zcash.conf file (updating if necessary)"
@@ -42,7 +42,7 @@ setup: ## Create all required directories and set permissions
 	$(SED) -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
 	$(SED) -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.conf; \
 	echo "Created new zcash.conf file with proper credentials. Copying in $(DATA_DIR)/zcashd/zcash.conf"; \
-	$(SUDO) cp -f zcash.conf $(DATA_DIR)/zcashd_data/zcash.conf
+	cp -f zcash.conf $(DATA_DIR)/zcashd_data/zcash.conf
 
 	@echo "Setting up zebrad.toml (updating if necessary)"
 	@cp -f zebrad.toml.template zebrad.toml
@@ -55,22 +55,22 @@ setup: ## Create all required directories and set permissions
 	$(SED) -i "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zaino.toml
 
 	@echo "Creating Caddy directories..."
-	$(SUDO) mkdir -p $(DATA_DIR)/caddy_data
-	$(SUDO) mkdir -p $(DATA_DIR)/caddy_config
+	mkdir -p $(DATA_DIR)/caddy_data
+	mkdir -p $(DATA_DIR)/caddy_config
 
 	@echo "Creating monitoring directories..."
-	$(SUDO) mkdir -p $(DATA_DIR)/prometheus_data
-	$(SUDO) mkdir -p $(DATA_DIR)/grafana_data
+	mkdir -p $(DATA_DIR)/prometheus_data
+	mkdir -p $(DATA_DIR)/grafana_data
 	$(if $(SUDO),$(SUDO) chown 65534:65534 $(DATA_DIR)/prometheus_data)
 	$(if $(SUDO),$(SUDO) chown -R 472:0 $(DATA_DIR)/grafana_data)
 	$(if $(SUDO),$(SUDO) chmod -R 755 $(DATA_DIR)/grafana_data)
 
 	@echo "Creating zebrad directories..."
-	$(SUDO) mkdir -p $(DATA_DIR)/zebrad-data
+	mkdir -p $(DATA_DIR)/zebrad-data
 	$(if $(SUDO),$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-data)
 
 	@echo "Creating zaino directories..."
-	$(SUDO) mkdir -p $(DATA_DIR)/zaino-data
+	mkdir -p $(DATA_DIR)/zaino-data
 	$(if $(SUDO),$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-data)
 
 	@echo "Creating Docker network..."
@@ -115,10 +115,10 @@ start-monitoring: ## Start monitoring stack (Prometheus, Node Exporter, Grafana)
 .PHONY: setup-testnet
 setup-testnet: ## Create testnet directories and config files
 	@echo "Setting up testnet directories..."
-	$(SUDO) mkdir -p $(DATA_DIR)/zcashd_testnet_data
-	$(SUDO) mkdir -p $(DATA_DIR)/lightwalletd_testnet_db
-	$(SUDO) mkdir -p $(DATA_DIR)/zebrad-testnet-cache
-	$(SUDO) mkdir -p $(DATA_DIR)/zaino-testnet-data
+	mkdir -p $(DATA_DIR)/zcashd_testnet_data
+	mkdir -p $(DATA_DIR)/lightwalletd_testnet_db
+	mkdir -p $(DATA_DIR)/zebrad-testnet-cache
+	mkdir -p $(DATA_DIR)/zaino-testnet-data
 	$(if $(SUDO),$(SUDO) chown 2002 $(DATA_DIR)/lightwalletd_testnet_db)
 	$(if $(SUDO),$(SUDO) chown -R 2001:2001 $(DATA_DIR)/zebrad-testnet-cache)
 	$(if $(SUDO),$(SUDO) chown -R 2003:2003 $(DATA_DIR)/zaino-testnet-data)
@@ -127,7 +127,7 @@ setup-testnet: ## Create testnet directories and config files
 	@cp -f zcash.conf.testnet.template zcash.testnet.conf
 	$(SED) -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.testnet.conf
 	$(SED) -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.testnet.conf
-	$(SUDO) cp -f zcash.testnet.conf $(DATA_DIR)/zcashd_testnet_data/zcash.conf
+	cp -f zcash.testnet.conf $(DATA_DIR)/zcashd_testnet_data/zcash.conf
 
 	@cp -f zebrad.toml.testnet.template zebrad.testnet.toml
 	$(SED) -i "s/ZEBRA_P2P_PORT/18233/g" zebrad.testnet.toml

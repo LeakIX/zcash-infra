@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   zcashd:
     image: electriccoinco/zcashd:v6.2.0

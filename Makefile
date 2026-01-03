@@ -10,40 +10,11 @@ endif
 DATA_DIR ?= /media/data-disk
 
 .PHONY: help
-help:
-	@echo "Zcash Infrastructure Management"
-	@echo ""
-	@echo "Usage:"
-	@echo "  make <target>"
-	@echo ""
-	@echo "Targets:"
-	@echo "  setup                  Create all required directories and set permissions"
-	@echo "  start-all              Start all services (Zcash, Caddy, and monitoring)"
-	@echo "  start-zcash            Start Zcash services only (zcashd and lightwalletd)"
-	@echo "  start-zebra            Start Zebra services only (zebra and zaino)"
-	@echo "  start-caddy            Start Caddy web server only"
-	@echo "  start-monitoring       Start monitoring stack only (Prometheus, Node Exporter, Grafana)"
-	@echo "  stop-all               Stop all services"
-	@echo "  stop-zcash             Stop Zcash services only"
-	@echo "  stop-zebra             Stop Zebra services only"
-	@echo "  stop-caddy             Stop Caddy web server only"
-	@echo "  stop-monitoring        Stop monitoring stack only"
-	@echo "  logs                   Show logs for all services"
-	@echo "  status                 Check status of all services"
-	@echo "  check-zcash-exporter   Verify the Zcash metrics exporter is working"
-	@echo "  restart-zcash-exporter Restart the Zcash metrics exporter container"
-	@echo "  build-zaino            Build the Zaino Docker image from source (latest version)"
-	@echo "  build-zaino-commit     Build Zaino from a specific commit (usage: make build-zaino-commit COMMIT=<hash>)"
-	@echo "  update-zaino-commit    Update docker-compose to use a specific Zaino commit (usage: make update-zaino-commit COMMIT=<hash>)"
-	@echo "  clean-zaino            Remove Zaino Docker image and build directory"
-	@echo "  clean                  Remove all containers and volumes (WARNING: destructive!)"
-	@echo "  clean-zcash            Remove Zcash containers and data volumes (WARNING: destructive!)"
-	@echo "  clean-networks         Remove all Docker networks (WARNING: destructive!)"
-	@echo "  clean-monitoring       Reset Prometheus and Grafana data (WARNING: destructive!)"
-	@echo "  help                   Show this help message"
+help: ## Show this help message
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: setup
-setup:
+setup: ## Create all required directories and set permissions
 	@echo "Setting up directories and permissions for Zcash infrastructure..."
 	@echo "Using DATA_DIR: $(DATA_DIR)"
 
@@ -95,32 +66,32 @@ setup:
 	@echo "Setup complete! You can now start services with 'make start-all'"
 
 .PHONY: start-all
-start-all:
+start-all: ## Start all services (Zcash, Caddy, and monitoring)
 	@echo "Starting all services (zcash, caddy, monitoring)..."
 	docker-compose -f docker-compose.zcash.yml -f docker-compose.caddy.yml -f docker-compose.monitoring.yml up -d
 	@echo "All services started successfully"
 
 .PHONY: start-zcash
-start-zcash:
+start-zcash: ## Start Zcash services only (zcashd and lightwalletd)
 	@echo "Starting Zcash services (zcashd + lightwalletd)..."
 	docker-compose -f docker-compose.zcash.yml up -d
 	@echo "Zcash services started successfully"
 
 .PHONY: start-zebra
-start-zebra:
+start-zebra: ## Start Zebra services only (zebra and zaino)
 	@echo "Starting Zebra (zebrad + zaino) services..."
 	@echo "zebrad starts first, and zaino container might restart multiple times until zebrad is ready"
 	docker-compose -f docker-compose.zebra.yml up -d
 	@echo "Zebra services started successfully"
 
 .PHONY: start-caddy
-start-caddy:
+start-caddy: ## Start Caddy web server only
 	@echo "Starting Caddy web server..."
 	docker-compose -f docker-compose.caddy.yml up -d
 	@echo "Caddy web server started successfully"
 
 .PHONY: start-monitoring
-start-monitoring:
+start-monitoring: ## Start monitoring stack (Prometheus, Node Exporter, Grafana)
 	@echo "Starting monitoring stack (Prometheus, Zcashd exporter, Node exporter, Grafana)..."
 	docker-compose -f docker-compose.monitoring.yml pull
 	docker-compose -f docker-compose.monitoring.yml up -d
@@ -129,128 +100,69 @@ start-monitoring:
 	@echo "You can visit http://localhost:3000/login to access Grafana and monitor the health of the node"
 
 .PHONY: stop-all
-stop-all:
+stop-all: ## Stop all services
 	@echo "Stopping all services..."
 	docker-compose -f docker-compose.zcash.yml -f docker-compose.caddy.yml -f docker-compose.monitoring.yml down
 	@echo "All services stopped successfully"
 
 .PHONY: stop-zcash
-stop-zcash:
+stop-zcash: ## Stop Zcash services only
 	@echo "Stopping Zcash services..."
 	docker-compose -f docker-compose.zcash.yml down
 	@echo "Zcash services stopped successfully"
 
 .PHONY: stop-zebra
-stop-zebra:
+stop-zebra: ## Stop Zebra services only
 	@echo "Stopping Zebra services..."
 	docker-compose -f docker-compose.zebra.yml down
 	@echo "Zebra services stopped successfully"
 
 .PHONY: stop-caddy
-stop-caddy:
+stop-caddy: ## Stop Caddy web server only
 	@echo "Stopping Caddy web server..."
 	docker-compose -f docker-compose.caddy.yml down
 	@echo "Caddy web server stopped successfully"
 
 .PHONY: stop-monitoring
-stop-monitoring:
+stop-monitoring: ## Stop monitoring stack only
 	@echo "Stopping monitoring stack..."
 	docker-compose -f docker-compose.monitoring.yml down
 	@echo "Monitoring stack stopped successfully"
 
 .PHONY: logs
-logs:
+logs: ## Show logs for all services
 	@echo "Showing logs for all services (press Ctrl+C to exit)..."
 	docker-compose -f docker-compose.zcash.yml -f docker-compose.caddy.yml -f docker-compose.monitoring.yml logs -f
 
 .PHONY: status
-status:
+status: ## Check status of all services
 	@echo "Service status:"
 	docker-compose -f docker-compose.zcash.yml -f docker-compose.caddy.yml -f docker-compose.monitoring.yml ps
 
-.PHONE: clean-zcash
-clean-zcash:
-	@echo "WARNING: This will remove all containers and volumes. Data may be lost!"
-	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
-	@sleep 5
-
-	@echo "Revoming zcash services, including the directories"
-	docker-compose -f docker-compose.zcash.yml down -v
-	@echo "Delete Zcash directories..."
-	sudo rm -rf $(DATA_DIR)/zcashd_data
-	sudo rm -rf $(DATA_DIR)/lightwalletd_db_volume
-
-.PHONY: clean
-clean: clean-zcash
-	@echo "WARNING: This will remove all containers and volumes. Data may be lost!"
-	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
-	@sleep 5
-
-	@echo "Removing all services and volumes..."
-	docker-compose -f docker-compose.caddy.yml -f docker-compose.monitoring.yml down -v
-	@echo "Cleanup complete"
-
-.PHONY: clean-networks
-clean-networks:
-	@echo "WARNING: This will attempt to remove ALL Docker networks. Running containers will be stopped!"
-	@echo "Only the default bridge, host, and none networks will remain."
-	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
-	@sleep 5
-
-	@echo "Listing all Docker networks before cleanup:"
-	docker network ls
-
-	@echo "\nStopping ALL Docker containers..."
-	-docker stop $$(docker ps -q) 2>/dev/null
-
-	@echo "\nRemoving all custom Docker networks..."
-	-docker network prune -f
-
-	@echo "\nForcefully removing any remaining networks except default ones..."
-	@for network in $$(docker network ls --format "{{.Name}}" | grep -v "^bridge$$" | grep -v "^host$$" | grep -v "^none$$"); do \
-		echo "Removing network: $$network"; \
-		docker network rm $$network 2>/dev/null || true; \
-	done
-
-	@echo "\nRemaining networks:"
-	docker network ls
-
-	@echo "\nNetwork cleanup complete"
-
-.PHONY: clean-monitoring
-clean-monitoring:
-	@echo "WARNING: This will remove all Prometheus and Grafana data. Monitoring history will be lost!"
-	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
-	@sleep 5
-
-	@echo "Stopping monitoring services..."
-	docker-compose -f docker-compose.monitoring.yml down
-
-	@echo "Removing Prometheus data..."
-	sudo rm -rf $(DATA_DIR)/prometheus_data/*
-
-	@echo "Removing Grafana data..."
-	sudo rm -rf $(DATA_DIR)/grafana_data/*
-
-	@echo "Recreating monitoring directories with proper permissions..."
-	sudo mkdir -p $(DATA_DIR)/prometheus_data
-	sudo mkdir -p $(DATA_DIR)/grafana_data
-	sudo chown 65534:65534 $(DATA_DIR)/prometheus_data
-	sudo chown -R 472:0 $(DATA_DIR)/grafana_data
-	sudo chmod -R 755 $(DATA_DIR)/grafana_data
-
-	@echo "Monitoring data has been cleaned."
-	@echo "You can restart the monitoring services with 'make start-monitoring'"
+.PHONY: lint
+lint: ## Validate docker-compose files and lint YAML
+	@echo "Validating Docker Compose files..."
+	docker compose -f docker-compose.zcash.yml config --quiet
+	docker compose -f docker-compose.zebra.yml config --quiet
+	docker compose -f docker-compose.caddy.yml config --quiet
+	docker compose -f docker-compose.monitoring.yml config --quiet
+	@echo "Linting YAML files..."
+	@if command -v yamllint >/dev/null 2>&1; then \
+		yamllint -d "{extends: relaxed, rules: {line-length: disable}}" *.yml prometheus.yml; \
+	else \
+		echo "Warning: yamllint not installed, skipping YAML linting (pip install yamllint)"; \
+	fi
+	@echo "All checks passed!"
 
 .PHONY: check-zcash-exporter
-check-zcash-exporter:
+check-zcash-exporter: ## Verify the Zcash metrics exporter is working
 	@echo "Checking Zcash exporter metrics endpoint..."
 	@echo "This will show if the exporter is working and collecting metrics from the Zcash node."
 	@curl -s http://localhost:9101/metrics | grep zcash || { echo "Failed to get metrics - check if the zcash-exporter container is running"; exit 1; }
 	@echo "\nZcash exporter is working correctly and collecting metrics."
 
 .PHONY: restart-zcash-exporter
-restart-zcash-exporter:
+restart-zcash-exporter: ## Restart the Zcash metrics exporter container
 	@echo "Restarting Zcash exporter container..."
 	docker-compose -f docker-compose.monitoring.yml restart zcash-exporter
 	@echo "Waiting for exporter to initialize (5 seconds)..."
@@ -260,7 +172,7 @@ restart-zcash-exporter:
 	@echo "\nZcash exporter has been restarted."
 
 .PHONY: build-zaino
-build-zaino:
+build-zaino: ## Build the Zaino Docker image from source (latest version)
 	@echo "Building Zaino Docker image..."
 	@if [ ! -d "tmp/zaino" ]; then \
 		echo "Cloning Zaino repository..."; \
@@ -280,7 +192,7 @@ build-zaino:
 	@echo "You can now start Zebra services with 'make start-zebra'"
 
 .PHONY: build-zaino-commit
-build-zaino-commit:
+build-zaino-commit: ## Build Zaino from a specific commit (COMMIT=<hash>)
 	@if [ -z "$(COMMIT)" ]; then \
 		echo "ERROR: COMMIT parameter is required. Usage: make build-zaino-commit COMMIT=<commit-hash>"; \
 		exit 1; \
@@ -307,7 +219,7 @@ build-zaino-commit:
 	@echo "You can now start Zebra services with 'make start-zebra'"
 
 .PHONY: update-zaino-commit
-update-zaino-commit:
+update-zaino-commit: ## Update docker-compose to use a specific Zaino commit (COMMIT=<hash>)
 	@if [ -z "$(COMMIT)" ]; then \
 		echo "ERROR: COMMIT parameter is required. Usage: make update-zaino-commit COMMIT=<commit-hash>"; \
 		exit 1; \
@@ -317,11 +229,85 @@ update-zaino-commit:
 	@echo "Docker Compose configuration updated to use Zaino commit $(COMMIT)."
 	@echo "Run 'make start-zebra' to apply the changes."
 
+.PHONY: clean
+clean: clean-zcash ## Remove all containers and volumes (WARNING: destructive!)
+	@echo "WARNING: This will remove all containers and volumes. Data may be lost!"
+	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
+	@sleep 5
+
+	@echo "Removing all services and volumes..."
+	docker-compose -f docker-compose.caddy.yml -f docker-compose.monitoring.yml down -v
+	@echo "Cleanup complete"
+
+.PHONY: clean-zcash
+clean-zcash: ## Remove Zcash containers and data volumes (WARNING: destructive!)
+	@echo "WARNING: This will remove all containers and volumes. Data may be lost!"
+	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
+	@sleep 5
+
+	@echo "Revoming zcash services, including the directories"
+	docker-compose -f docker-compose.zcash.yml down -v
+	@echo "Delete Zcash directories..."
+	sudo rm -rf $(DATA_DIR)/zcashd_data
+	sudo rm -rf $(DATA_DIR)/lightwalletd_db_volume
+
 .PHONY: clean-zaino
-clean-zaino:
+clean-zaino: ## Remove Zaino Docker image and build directory
 	@echo "Cleaning Zaino Docker images and build directory..."
 	@echo "Removing Zaino Docker images..."
 	-docker images zingolabs/zaino --format "{{.Repository}}:{{.Tag}}" | xargs -r docker rmi 2>/dev/null || true
 	@echo "Removing Zaino build directory..."
 	-rm -rf tmp/zaino
 	@echo "Zaino cleanup complete."
+
+.PHONY: clean-networks
+clean-networks: ## Remove all Docker networks (WARNING: destructive!)
+	@echo "WARNING: This will attempt to remove ALL Docker networks. Running containers will be stopped!"
+	@echo "Only the default bridge, host, and none networks will remain."
+	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
+	@sleep 5
+
+	@echo "Listing all Docker networks before cleanup:"
+	docker network ls
+
+	@echo "\nStopping ALL Docker containers..."
+	-docker stop $$(docker ps -q) 2>/dev/null
+
+	@echo "\nRemoving all custom Docker networks..."
+	-docker network prune -f
+
+	@echo "\nForcefully removing any remaining networks except default ones..."
+	@for network in $$(docker network ls --format "{{.Name}}" | grep -v "^bridge$$" | grep -v "^host$$" | grep -v "^none$$"); do \
+		echo "Removing network: $$network"; \
+		docker network rm $$network 2>/dev/null || true; \
+	done
+
+	@echo "\nRemaining networks:"
+	docker network ls
+
+	@echo "\nNetwork cleanup complete"
+
+.PHONY: clean-monitoring
+clean-monitoring: ## Reset Prometheus and Grafana data (WARNING: destructive!)
+	@echo "WARNING: This will remove all Prometheus and Grafana data. Monitoring history will be lost!"
+	@echo "Press Ctrl+C now to abort, or wait 5 seconds to continue..."
+	@sleep 5
+
+	@echo "Stopping monitoring services..."
+	docker-compose -f docker-compose.monitoring.yml down
+
+	@echo "Removing Prometheus data..."
+	sudo rm -rf $(DATA_DIR)/prometheus_data/*
+
+	@echo "Removing Grafana data..."
+	sudo rm -rf $(DATA_DIR)/grafana_data/*
+
+	@echo "Recreating monitoring directories with proper permissions..."
+	sudo mkdir -p $(DATA_DIR)/prometheus_data
+	sudo mkdir -p $(DATA_DIR)/grafana_data
+	sudo chown 65534:65534 $(DATA_DIR)/prometheus_data
+	sudo chown -R 472:0 $(DATA_DIR)/grafana_data
+	sudo chmod -R 755 $(DATA_DIR)/grafana_data
+
+	@echo "Monitoring data has been cleaned."
+	@echo "You can restart the monitoring services with 'make start-monitoring'"

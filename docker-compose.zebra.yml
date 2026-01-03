@@ -1,10 +1,9 @@
 # This docker-compose is inspired from
 # https://github.com/zecrocks/zcash-stack/blob/dcebc1e5a541dca634b3025d4910abf09b849a88/docker/docker-compose.zaino.yml
-version: '3.8'
 
 services:
   zebra:
-    image: zfnd/zebra:2.3.0
+    image: zfnd/zebra:3.1.0
     container_name: zebra
     restart: always
     ports:
@@ -26,11 +25,10 @@ services:
       - "${ZAINO_GRPC_PORT:-8137}:8137"  # Zaino API port
     volumes:
       - ./zaino.toml:/etc/zaino/zaino.toml:ro
-      - ${DATA_DIR}/zaino-data/zaino-cache:/hoome/zaino/.cache/zaino
+      - ${DATA_DIR}/zaino-data/zaino-cache:/home/container_user/.cache/zaino
     networks:
       - zcash-network
-    command: >-
-      --config /etc/zaino/zaino.toml
+    command: ["zainod", "--config", "/etc/zaino/zaino.toml"]
 
 networks:
   zcash-network:

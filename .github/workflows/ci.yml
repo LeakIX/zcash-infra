@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Compose files
+        run: |
+          docker compose -f docker-compose.zcash.yml config --quiet
+          docker compose -f docker-compose.zebra.yml config --quiet
+          docker compose -f docker-compose.caddy.yml config --quiet
+          docker compose -f docker-compose.monitoring.yml config --quiet
+
+      - name: Lint YAML files
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: "*.yml prometheus.yml"
+          config_data: |
+            extends: relaxed
+            rules:
+              line-length: disable
+
+  test-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull Docker images
+        run: |
+          docker pull zfnd/zebra:3.1.0
+          docker pull electriccoinco/zcashd:v6.2.0
+          docker pull electriccoinco/lightwalletd:v0.4.18
+
+  build-zaino:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Zaino image
+        run: make build-zaino
+        timeout-minutes: 30

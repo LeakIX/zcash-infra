@@ -79,32 +79,32 @@ setup: ## Create all required directories and set permissions
 	@echo "Setup complete! You can now start services with 'make start-all'"
 
 .PHONY: start-all
-start-all: ## Start all services (Zcash, Caddy, and monitoring)
+start-all: setup ## Start all services (Zcash, Caddy, and monitoring)
 	@echo "Starting all services (zcash, caddy, monitoring)..."
 	docker-compose -f docker-compose.zcash.yml -f docker-compose.caddy.yml -f docker-compose.monitoring.yml up -d
 	@echo "All services started successfully"
 
 .PHONY: start-zcash
-start-zcash: ## Start Zcash services only (zcashd and lightwalletd)
+start-zcash: setup ## Start Zcash services only (zcashd and lightwalletd)
 	@echo "Starting Zcash services (zcashd + lightwalletd)..."
 	docker-compose -f docker-compose.zcash.yml up -d
 	@echo "Zcash services started successfully"
 
 .PHONY: start-zebra
-start-zebra: ## Start Zebra services only (zebra and zaino)
+start-zebra: setup ## Start Zebra services only (zebra and zaino)
 	@echo "Starting Zebra (zebrad + zaino) services..."
 	@echo "zebrad starts first, and zaino container might restart multiple times until zebrad is ready"
 	docker-compose -f docker-compose.zebra.yml up -d
 	@echo "Zebra services started successfully"
 
 .PHONY: start-caddy
-start-caddy: ## Start Caddy web server only
+start-caddy: setup ## Start Caddy web server only
 	@echo "Starting Caddy web server..."
 	docker-compose -f docker-compose.caddy.yml up -d
 	@echo "Caddy web server started successfully"
 
 .PHONY: start-monitoring
-start-monitoring: ## Start monitoring stack (Prometheus, Node Exporter, Grafana)
+start-monitoring: setup ## Start monitoring stack (Prometheus, Node Exporter, Grafana)
 	@echo "Starting monitoring stack (Prometheus, Zcashd exporter, Node exporter, Grafana)..."
 	docker-compose -f docker-compose.monitoring.yml pull
 	docker-compose -f docker-compose.monitoring.yml up -d
@@ -140,13 +140,13 @@ setup-testnet: ## Create testnet directories and config files
 	@echo "Testnet setup complete!"
 
 .PHONY: start-zcash-testnet
-start-zcash-testnet: ## Start Zcash testnet services (zcashd-testnet and lightwalletd-testnet)
+start-zcash-testnet: setup-testnet ## Start Zcash testnet services (zcashd-testnet and lightwalletd-testnet)
 	@echo "Starting Zcash testnet services..."
 	docker-compose -f docker-compose.zcash.testnet.yml up -d
 	@echo "Zcash testnet services started successfully"
 
 .PHONY: start-zebra-testnet
-start-zebra-testnet: ## Start Zebra testnet services (zebra-testnet and zaino-testnet)
+start-zebra-testnet: setup-testnet ## Start Zebra testnet services (zebra-testnet and zaino-testnet)
 	@echo "Starting Zebra testnet services..."
 	docker-compose -f docker-compose.zebra.testnet.yml up -d
 	@echo "Zebra testnet services started successfully"

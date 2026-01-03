@@ -13,6 +13,9 @@ zcash.conf
 zebrad.toml
 zaino.toml
 .env
+zebrad.testnet.toml
+zaino.testnet.toml
+zcash.testnet.conf
 
 # Grafana dashboards (complex JSON, keep as-is)
 grafana/dashboards/

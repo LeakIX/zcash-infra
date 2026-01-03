@@ -1,0 +1,18 @@
+network = "Testnet"
+grpc_listen_address = "0.0.0.0:ZAINO_GRPC_PORT"
+grpc_tls = false
+tls_cert_path = "None"
+tls_key_path = "None"
+# Connect to zebra-testnet container
+validator_listen_address = "zebra-testnet:ZEBRA_RPC_PORT"
+validator_cookie_auth = false
+validator_cookie_path = "None"
+validator_user = "None"
+validator_password = "None"
+map_capacity = "None"
+map_shard_amount = "None"
+db_path = "/home/zaino/.cache/zaino"
+db_size = "None"
+no_sync = false
+no_db = true
+no_state = false

@@ -1,0 +1,46 @@
+# Zcash Testnet Configuration File
+# This file will be copied into zcash.conf when running `make start-zcash-testnet`
+
+# Enable testnet
+testnet=1
+
+# Network Configuration
+listen=1
+bind=0.0.0.0
+rpcbind=0.0.0.0
+rpcallowip=0.0.0.0/0
+
+# RPC Authentication (use values from .env file)
+rpcuser=LIGHTWALLETD_RPC_USER
+rpcpassword=LIGHTWALLETD_RPC_PASSWORD
+
+# P2P Network Configuration
+maxconnections=125
+
+# Testnet seed nodes
+addnode=testnet.z.cash
+addnode=dnsseed.testnet.z.cash
+
+# Performance Optimization
+dbcache=450
+maxuploadtarget=1000
+maxreceivebuffer=2500
+maxsendbuffer=500
+
+# Transaction Index
+txindex=0
+
+# Wallet Options
+disablewallet=0
+
+# Security Settings
+gen=0
+
+# Logging
+shrinkdebugfile=1
+
+# Checkpoint verification
+checkblocks=24
+checklevel=4
+
+i-am-aware-zcashd-will-be-replaced-by-zebrad-and-zallet-in-2025=1

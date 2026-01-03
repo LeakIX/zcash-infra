@@ -5,3 +5,8 @@ zebrad.toml
 zaino.toml
 .env
 zcash.conf
+
+# Testnet generated configs
+zebrad.testnet.toml
+zaino.testnet.toml
+zcash.testnet.conf

@@ -154,6 +154,27 @@ lint: ## Validate docker-compose files and lint YAML
 	fi
 	@echo "All checks passed!"
 
+.PHONY: format
+format: ## Format YAML and Markdown files with prettier
+	@echo "Formatting files with prettier..."
+	@if command -v prettier >/dev/null 2>&1; then \
+		prettier --write "*.yml" "*.yaml" "*.md" ".github/**/*.yml" 2>/dev/null || true; \
+	else \
+		echo "Error: prettier not installed (npm install -g prettier)"; \
+		exit 1; \
+	fi
+	@echo "Formatting complete!"
+
+.PHONY: format-check
+format-check: ## Check if files are formatted correctly
+	@echo "Checking file formatting..."
+	@if command -v prettier >/dev/null 2>&1; then \
+		prettier --check "*.yml" "*.yaml" "*.md" ".github/**/*.yml" 2>/dev/null || true; \
+	else \
+		echo "Error: prettier not installed (npm install -g prettier)"; \
+		exit 1; \
+	fi
+
 .PHONY: check-zcash-exporter
 check-zcash-exporter: ## Verify the Zcash metrics exporter is working
 	@echo "Checking Zcash exporter metrics endpoint..."

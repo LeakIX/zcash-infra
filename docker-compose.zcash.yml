@@ -4,8 +4,8 @@ services:
     container_name: zcashd
     restart: always
     ports:
-      - "${ZCASHD_RPC_PORT:-8232}:8232"     # RPC port for API access
-      - "${ZCASHD_P2P_PORT:-8233}:8233"     # P2P port for peer connections
+      - "${ZCASHD_RPC_PORT:-8232}:8232" # RPC port for API access
+      - "${ZCASHD_P2P_PORT:-8233}:8233" # P2P port for peer connections
     volumes:
       - ${DATA_DIR}/zcashd_data:/srv/zcashd/.zcash
     networks:
@@ -24,13 +24,9 @@ services:
     networks:
       - zcash-network
     command: >
-      --grpc-bind-addr 0.0.0.0:9067
-      --no-tls-very-insecure
-      --rpchost zcashd
-      --rpcport 8232
-      --rpcuser ${LIGHTWALLETD_RPC_USER}
-      --rpcpassword ${LIGHTWALLETD_RPC_PASSWORD}
-      --data-dir /srv/lightwalletd/db_volume
+      --grpc-bind-addr 0.0.0.0:9067 --no-tls-very-insecure --rpchost zcashd
+      --rpcport 8232 --rpcuser ${LIGHTWALLETD_RPC_USER} --rpcpassword
+      ${LIGHTWALLETD_RPC_PASSWORD} --data-dir /srv/lightwalletd/db_volume
       --log-file /dev/stdout
 
 networks:

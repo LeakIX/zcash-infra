@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+tmp/
+
+# Data directories
+caddy_data/
+caddy_config/
+
+# Generated config files (from templates)
+zcash.conf
+zebrad.toml
+zaino.toml
+.env
+
+# Grafana dashboards (complex JSON, keep as-is)
+grafana/dashboards/

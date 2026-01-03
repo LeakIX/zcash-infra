@@ -12,8 +12,15 @@ DATA_DIR ?= /media/data-disk
 # Set SUDO to empty for local development: make setup SUDO=
 SUDO ?= sudo
 
-# macOS sed requires '' for in-place, GNU sed does not
-SEDI := $(shell if sed --version 2>/dev/null | grep -q GNU; then echo 'sed -i'; else echo 'sed -i ""'; fi)
+# Require GNU sed (gsed on macOS, sed on Linux)
+ifeq ($(shell uname -s),Darwin)
+    ifeq ($(shell which gsed 2>/dev/null),)
+        $(error GNU sed is required on macOS. Install with: brew install gnu-sed)
+    endif
+    SED := gsed
+else
+    SED := sed
+endif
 
 .PHONY: help
 help: ## Show this help message
@@ -31,21 +38,21 @@ setup: ## Create all required directories and set permissions
 
 	@echo "Setting up zcash.conf file (updating if necessary)"
 	cp zcash.conf.template zcash.conf; \
-	$(SEDI) "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
-	$(SEDI) "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
-	$(SEDI) "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.conf; \
+	$(SED) -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
+	$(SED) -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.conf; \
+	$(SED) -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.conf; \
 	echo "Created new zcash.conf file with proper credentials. Copying in $(DATA_DIR)/zcashd/zcash.conf"; \
 	$(SUDO) cp -f zcash.conf $(DATA_DIR)/zcashd_data/zcash.conf
 
 	@echo "Setting up zebrad.toml (updating if necessary)"
 	@cp -f zebrad.toml.template zebrad.toml
-	$(SEDI) "s/ZEBRA_P2P_PORT/$(ZEBRA_P2P_PORT)/g" zebrad.toml
-	$(SEDI) "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zebrad.toml
+	$(SED) -i "s/ZEBRA_P2P_PORT/$(ZEBRA_P2P_PORT)/g" zebrad.toml
+	$(SED) -i "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zebrad.toml
 
 	@echo "Setting up zaino.toml (updating if necessary)"
 	@cp -f zaino.toml.template zaino.toml
-	$(SEDI) "s/ZAINO_GRPC_PORT/$(ZAINO_GRPC_PORT)/g" zaino.toml
-	$(SEDI) "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zaino.toml
+	$(SED) -i "s/ZAINO_GRPC_PORT/$(ZAINO_GRPC_PORT)/g" zaino.toml
+	$(SED) -i "s/ZEBRA_RPC_PORT/$(ZEBRA_RPC_PORT)/g" zaino.toml
 
 	@echo "Creating Caddy directories..."
 	$(SUDO) mkdir -p $(DATA_DIR)/caddy_data
@@ -118,17 +125,17 @@ setup-testnet: ## Create testnet directories and config files
 
 	@echo "Setting up testnet config files..."
 	@cp -f zcash.conf.testnet.template zcash.testnet.conf
-	$(SEDI) "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.testnet.conf
-	$(SEDI) "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.testnet.conf
+	$(SED) -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.testnet.conf
+	$(SED) -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.testnet.conf
 	$(SUDO) cp -f zcash.testnet.conf $(DATA_DIR)/zcashd_testnet_data/zcash.conf
 
 	@cp -f zebrad.toml.testnet.template zebrad.testnet.toml
-	$(SEDI) "s/ZEBRA_P2P_PORT/18233/g" zebrad.testnet.toml
-	$(SEDI) "s/ZEBRA_RPC_PORT/18232/g" zebrad.testnet.toml
+	$(SED) -i "s/ZEBRA_P2P_PORT/18233/g" zebrad.testnet.toml
+	$(SED) -i "s/ZEBRA_RPC_PORT/18232/g" zebrad.testnet.toml
 
 	@cp -f zaino.toml.testnet.template zaino.testnet.toml
-	$(SEDI) "s/ZAINO_GRPC_PORT/8137/g" zaino.testnet.toml
-	$(SEDI) "s/ZEBRA_RPC_PORT/8232/g" zaino.testnet.toml
+	$(SED) -i "s/ZAINO_GRPC_PORT/8137/g" zaino.testnet.toml
+	$(SED) -i "s/ZEBRA_RPC_PORT/8232/g" zaino.testnet.toml
 
 	@echo "Testnet setup complete!"
 
@@ -303,7 +310,7 @@ update-zaino-commit: ## Update docker-compose to use a specific Zaino commit (CO
 		exit 1; \
 	fi
 	@echo "Updating docker-compose.zebra.yml to use Zaino commit $(COMMIT)..."
-	@$(SEDI) 's|image: zingolabs/zaino:.*|image: zingolabs/zaino:$(COMMIT)  # Build with '\''make build-zaino-commit COMMIT=$(COMMIT)'\''|' docker-compose.zebra.yml
+	@$(SED) -i 's|image: zingolabs/zaino:.*|image: zingolabs/zaino:$(COMMIT)  # Build with '\''make build-zaino-commit COMMIT=$(COMMIT)'\''|' docker-compose.zebra.yml
 	@echo "Docker Compose configuration updated to use Zaino commit $(COMMIT)."
 	@echo "Run 'make start-zebra' to apply the changes."
 

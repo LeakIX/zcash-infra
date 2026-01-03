@@ -1,6 +1,6 @@
 services:
   zcashd:
-    image: electriccoinco/zcashd:v6.2.0
+    image: electriccoinco/zcashd:v6.10.0
     container_name: zcashd
     restart: always
     ports:

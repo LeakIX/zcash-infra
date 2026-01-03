@@ -1,0 +1,37 @@
+# Zcash Testnet Configuration
+
+services:
+  zcashd-testnet:
+    image: electriccoinco/zcashd:v6.10.0
+    container_name: zcashd-testnet
+    restart: always
+    ports:
+      - "${ZCASHD_TESTNET_RPC_PORT:-18232}:18232"
+      - "${ZCASHD_TESTNET_P2P_PORT:-18233}:18233"
+    volumes:
+      - ${DATA_DIR}/zcashd_testnet_data:/srv/zcashd/.zcash
+    networks:
+      - zcash-network
+
+  lightwalletd-testnet:
+    image: electriccoinco/lightwalletd:v0.4.18
+    container_name: lightwalletd-testnet
+    restart: always
+    depends_on:
+      - zcashd-testnet
+    ports:
+      - "${LIGHTWALLETD_TESTNET_PORT:-19067}:9067"
+    volumes:
+      - ${DATA_DIR}/lightwalletd_testnet_db:/srv/lightwalletd/db_volume
+    networks:
+      - zcash-network
+    command: >
+      --grpc-bind-addr 0.0.0.0:9067 --no-tls-very-insecure --rpchost
+      zcashd-testnet --rpcport 18232 --rpcuser ${LIGHTWALLETD_RPC_USER}
+      --rpcpassword ${LIGHTWALLETD_RPC_PASSWORD} --data-dir
+      /srv/lightwalletd/db_volume --log-file /dev/stdout
+
+networks:
+  zcash-network:
+    external: true
+    name: zcash-network

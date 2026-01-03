@@ -99,6 +99,57 @@ start-monitoring: ## Start monitoring stack (Prometheus, Node Exporter, Grafana)
 	@echo "You can run make check-zcash-exporter to verify that data are fetched from zcash"
 	@echo "You can visit http://localhost:3000/login to access Grafana and monitor the health of the node"
 
+.PHONY: setup-testnet
+setup-testnet: ## Create testnet directories and config files
+	@echo "Setting up testnet directories..."
+	sudo mkdir -p $(DATA_DIR)/zcashd_testnet_data
+	sudo mkdir -p $(DATA_DIR)/lightwalletd_testnet_db
+	sudo mkdir -p $(DATA_DIR)/zebrad-testnet-cache
+	sudo mkdir -p $(DATA_DIR)/zaino-testnet-data
+	sudo chown 2002 $(DATA_DIR)/lightwalletd_testnet_db
+	sudo chown -R 2001:2001 $(DATA_DIR)/zebrad-testnet-cache
+	sudo chown -R 2003:2003 $(DATA_DIR)/zaino-testnet-data
+
+	@echo "Setting up testnet config files..."
+	@cp -f zcash.conf.testnet.template zcash.testnet.conf
+	sed -i "s/LIGHTWALLETD_RPC_USER/$(LIGHTWALLETD_RPC_USER)/g" zcash.testnet.conf
+	sed -i "s/LIGHTWALLETD_RPC_PASSWORD/$(LIGHTWALLETD_RPC_PASSWORD)/g" zcash.testnet.conf
+	sudo cp -f zcash.testnet.conf $(DATA_DIR)/zcashd_testnet_data/zcash.conf
+
+	@cp -f zebrad.toml.testnet.template zebrad.testnet.toml
+	sed -i "s/ZEBRA_P2P_PORT/18233/g" zebrad.testnet.toml
+	sed -i "s/ZEBRA_RPC_PORT/18232/g" zebrad.testnet.toml
+
+	@cp -f zaino.toml.testnet.template zaino.testnet.toml
+	sed -i "s/ZAINO_GRPC_PORT/8137/g" zaino.testnet.toml
+	sed -i "s/ZEBRA_RPC_PORT/8232/g" zaino.testnet.toml
+
+	@echo "Testnet setup complete!"
+
+.PHONY: start-zcash-testnet
+start-zcash-testnet: ## Start Zcash testnet services (zcashd-testnet and lightwalletd-testnet)
+	@echo "Starting Zcash testnet services..."
+	docker-compose -f docker-compose.zcash.testnet.yml up -d
+	@echo "Zcash testnet services started successfully"
+
+.PHONY: start-zebra-testnet
+start-zebra-testnet: ## Start Zebra testnet services (zebra-testnet and zaino-testnet)
+	@echo "Starting Zebra testnet services..."
+	docker-compose -f docker-compose.zebra.testnet.yml up -d
+	@echo "Zebra testnet services started successfully"
+
+.PHONY: stop-zcash-testnet
+stop-zcash-testnet: ## Stop Zcash testnet services
+	@echo "Stopping Zcash testnet services..."
+	docker-compose -f docker-compose.zcash.testnet.yml down
+	@echo "Zcash testnet services stopped successfully"
+
+.PHONY: stop-zebra-testnet
+stop-zebra-testnet: ## Stop Zebra testnet services
+	@echo "Stopping Zebra testnet services..."
+	docker-compose -f docker-compose.zebra.testnet.yml down
+	@echo "Zebra testnet services stopped successfully"
+
 .PHONY: stop-all
 stop-all: ## Stop all services
 	@echo "Stopping all services..."

@@ -1,0 +1,35 @@
+# Zebra Testnet Configuration
+
+services:
+  zebra-testnet:
+    image: zfnd/zebra:3.1.0
+    container_name: zebra-testnet
+    restart: always
+    ports:
+      - "${ZEBRA_TESTNET_RPC_PORT:-18232}:8232"
+      - "${ZEBRA_TESTNET_P2P_PORT:-18233}:8233"
+    volumes:
+      - ${DATA_DIR}/zebrad-testnet-cache:/home/zebra/.cache/zebra
+      - ./zebrad.testnet.toml:/etc/zebrad/zebrad.toml:ro
+    networks:
+      - zcash-network
+
+  zaino-testnet:
+    image: zingolabs/zaino:latest
+    container_name: zaino-testnet
+    restart: always
+    depends_on:
+      - zebra-testnet
+    ports:
+      - "${ZAINO_TESTNET_GRPC_PORT:-18137}:8137"
+    volumes:
+      - ./zaino.testnet.toml:/etc/zaino/zaino.toml:ro
+      - ${DATA_DIR}/zaino-testnet-data:/home/container_user/.cache/zaino
+    networks:
+      - zcash-network
+    command: ["zainod", "--config", "/etc/zaino/zaino.toml"]
+
+networks:
+  zcash-network:
+    external: true
+    name: zcash-network

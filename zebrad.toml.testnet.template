@@ -1,0 +1,14 @@
+[network]
+network = "Testnet"
+listen_addr = "0.0.0.0:ZEBRA_P2P_PORT"
+
+[state]
+cache_dir = "/var/cache/zebrad-cache"
+
+[rpc]
+listen_addr = "0.0.0.0:ZEBRA_RPC_PORT"
+enable_cookie_auth = false
+parallel_cpu_threads = 0
+
+[tracing]
+use_color = false

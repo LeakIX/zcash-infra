@@ -13,7 +13,7 @@ services:
       - ./zebrad.testnet.toml:/etc/zebrad/zebrad.toml:ro
     networks:
       - zcash-network
-    command: ["-c", "/etc/zebrad/zebrad.toml", "start"]
+    entrypoint: ["zebrad", "-c", "/etc/zebrad/zebrad.toml", "start"]
 
   zaino-testnet:
     image: zingolabs/zaino:latest

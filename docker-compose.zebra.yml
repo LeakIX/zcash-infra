@@ -14,7 +14,7 @@ services:
       - ./zebrad.toml:/etc/zebrad/zebrad.toml:ro
     networks:
       - zcash-network
-    command: ["-c", "/etc/zebrad/zebrad.toml", "start"]
+    entrypoint: ["zebrad", "-c", "/etc/zebrad/zebrad.toml", "start"]
 
   zaino:
     image: zingolabs/zaino:latest # Build with 'make build-zaino' or specify commit with 'make update-zaino-commit COMMIT=<hash>'
